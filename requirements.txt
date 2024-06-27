@@ -1,0 +1,4 @@
+reduct-py
+matplotlib
+numpy
+ipykernel
