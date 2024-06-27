@@ -57,17 +57,15 @@ plt.show()
 
 # %% Typical Weekend Problem
 # Generate a sample data retention scenario
-days = np.arange(14)
-data_retained = [
-    1 if (i < 7 or i > 9) else 0 for i in days
-]  # Retain data except for weekend days 7, 8, 9
+days = np.arange(1, 11)
+data_retained = [1 if (i < 6 or i > 7) else 0 for i in days]
 
 # Plot the retention policy
 plt.figure(figsize=(12, 6))
 plt.bar(days, data_retained, color="#2c0549")
 plt.xticks(days, [f"Day {i}" for i in days])
 plt.xlabel("Days")
-plt.ylabel("Data Retained (1 = Yes, 0 = No)")
+plt.ylabel("Data Generated")
 plt.title("Typical Weekend Problem: Data Retention Policy")
 plt.savefig(os.path.join(directory, "weekend_problem.png"), dpi=300)
 plt.show()
