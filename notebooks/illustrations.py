@@ -60,13 +60,18 @@ plt.show()
 days = np.arange(1, 11)
 data_retained = [1 if (i < 6 or i > 7) else 0 for i in days]
 
-# Plot the retention policy
+# Plot the retention policy color in gray the first 2 days
 plt.figure(figsize=(12, 6))
 plt.bar(days, data_retained, color="#2c0549")
+
+# Highlight the lost data
+plt.axvspan(0, 2.5, color="gray", alpha=0.5)
+plt.text(1.5, 1.01, "Data Lost", fontsize=12, color="black", ha="center")
+
 plt.xticks(days, [f"Day {i}" for i in days])
 plt.xlabel("Days")
 plt.ylabel("Data Generated")
-plt.title("Typical Weekend Problem: Data Retention Policy")
+plt.title("Typical Weekend Problem")
 plt.savefig(os.path.join(directory, "weekend_problem.png"), dpi=300)
 plt.show()
 
