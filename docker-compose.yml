@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  reductstore:
+    image: reduct/store:latest
+    ports:
+      - "8383:8383"
+    volumes:
+      - data:/data
+    environment:
+      - REDUCT_SERVER_API_TOKEN=my-token
+
+volumes:
+  data:
+    driver: local
