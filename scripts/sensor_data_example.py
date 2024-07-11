@@ -24,7 +24,7 @@ def generate_sensor_data(frequency: int = 1000, duration: int = 1) -> np.ndarray
 
 
 # 3. Calculate metrics
-def calculate_metrics(signal: np.ndarray) -> tuple[float, float, float]:
+def calculate_metrics(signal: np.ndarray) -> tuple:
     rms = np.sqrt(np.mean(signal**2))
     peak_to_peak = np.max(signal) - np.min(signal)
     crest_factor = np.max(np.abs(signal)) / rms
