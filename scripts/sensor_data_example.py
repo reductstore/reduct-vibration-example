@@ -20,7 +20,7 @@ async def setup_reductstore():
 def generate_sensor_data(frequency=1000, duration=1):
     t = np.linspace(0, duration, frequency * duration)
     signal = np.sin(2 * np.pi * 10 * t) + 0.5 * np.random.randn(len(t))
-    return signal.astype(np.float32)  # Ensure 32-bit float type
+    return signal.astype(np.float32)
 
 
 # 3. Calculate metrics
@@ -81,9 +81,9 @@ async def main():
         )
         await asyncio.sleep(1)
 
-    # Query the stored data
+    # Query the stored data for the last 5 seconds
     end_time = int(time.time() * 1_000_000)
-    start_time = end_time - 5_000_000  # 5 seconds in microseconds
+    start_time = end_time - 5_000_000
     await query_data(bucket, start_time, end_time)
 
 
