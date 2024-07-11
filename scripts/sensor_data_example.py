@@ -58,9 +58,10 @@ async def query_data(bucket, start_time, end_time):
         print(f"Labels: {record.labels}")
 
         data = await record.read_all()
-        num_points = len(data) // 4  # 4 bytes per float
+        num_points = len(data) // 4
         fmt = f">{num_points}f"
         signal = struct.unpack(fmt, data)
+        signal = np.array(signal, dtype=np.float32)
 
         print(f"Number of data points: {num_points}")
         print(f"First few values: {signal[:5]}")
