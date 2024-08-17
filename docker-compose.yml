@@ -1,15 +1,29 @@
-version: '3.8'
-
 services:
   reductstore:
     image: reduct/store:latest
     ports:
       - "8383:8383"
     volumes:
-      - data:/data
+      - reductstore_data:/data
     environment:
       - RS_API_TOKEN=my-token
 
+  influxdb:
+    image: influxdb:latest
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=my-user
+      - DOCKER_INFLUXDB_INIT_PASSWORD=my-password
+      - DOCKER_INFLUXDB_INIT_ORG=my-org
+      - DOCKER_INFLUXDB_INIT_BUCKET=sensor_data
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-token
+
 volumes:
-  data:
+  reductstore_data:
+    driver: local
+  influxdb_data:
     driver: local

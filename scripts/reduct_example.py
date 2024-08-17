@@ -1,8 +1,12 @@
+"""Example script to demonstrate how to use the ReductStore API for storing and querying vibration data."""
+
 import asyncio
-import time
 import struct
+import time
+
 import numpy as np
-from reduct import Client, Bucket
+from reduct import Bucket, Client
+from utils import calculate_metrics, generate_sensor_data, pack_data
 
 
 HIGH_RMS = 1.0
@@ -10,42 +14,21 @@ HIGH_CREST_FACTOR = 3.0
 HIGH_PEAK_TO_PEAK = 5.0
 
 
-# 1. Set up and connect to ReductStore
 async def setup_reductstore() -> Bucket:
+    """Set up the ReductStore client and create a bucket."""
     client = Client("http://localhost:8383", api_token="my-token")
     return await client.create_bucket("sensor_data", exist_ok=True)
 
 
-# 2. Generate simulated sensor data
-def generate_sensor_data(frequency: int = 1000, duration: int = 1) -> np.ndarray:
-    t = np.linspace(0, duration, frequency * duration)
-    signal = np.sin(2 * np.pi * 10 * t) + 0.5 * np.random.randn(len(t))
-    return signal.astype(np.float32)
-
-
-# 3. Calculate metrics
-def calculate_metrics(signal: np.ndarray) -> tuple:
-    rms = np.sqrt(np.mean(signal**2))
-    peak_to_peak = np.max(signal) - np.min(signal)
-    crest_factor = np.max(np.abs(signal)) / rms
-    return rms, peak_to_peak, crest_factor
-
-
-# 4. Pack data into binary format using struct
-def pack_data(signal: np.ndarray) -> bytes:
-    fmt = f">{len(signal)}f"  # '>' for big-endian, 'f' for 32-bit float
-    return struct.pack(fmt, *signal)
-
-
-# 5. Store data in ReductStore
 async def store_data(
     bucket: Bucket,
     timestamp: int,
     packed_data: bytes,
-    rms: float,
-    peak_to_peak: float,
-    crest_factor: float,
+    rms: float = 0.0,
+    peak_to_peak: float = 0.0,
+    crest_factor: float = 0.0,
 ):
+    """Store the sensor data in the ReductStore."""
     labels = {
         "rms": "high" if rms > HIGH_RMS else "low",
         "peak_to_peak": "high" if peak_to_peak > HIGH_PEAK_TO_PEAK else "low",
@@ -54,8 +37,8 @@ async def store_data(
     await bucket.write("sensor_readings", packed_data, timestamp, labels=labels)
 
 
-# 6. Query and retrieve the stored data
 async def query_data(bucket: Bucket, start_time: int, end_time: int):
+    """Query and retrieve the stored data."""
     async for record in bucket.query(
         "sensor_readings", start=start_time, stop=end_time
     ):
@@ -74,12 +57,13 @@ async def query_data(bucket: Bucket, start_time: int, end_time: int):
 
 
 async def main():
+    """Example of storing and querying sensor data in ReductStore."""
     bucket = await setup_reductstore()
+    start_time = int(time.time() * 1_000_000)
 
-    # Store 5 seconds of data
     for _ in range(5):
         timestamp = int(time.time() * 1_000_000)
-        signal = generate_sensor_data()
+        signal = generate_sensor_data(frequency=1000, duration=1)
         rms, peak_to_peak, crest_factor = calculate_metrics(signal)
         packed_data = pack_data(signal)
         await store_data(
@@ -87,11 +71,10 @@ async def main():
         )
         await asyncio.sleep(1)
 
-    # Query the stored data for the last 5 seconds
     end_time = int(time.time() * 1_000_000)
-    start_time = end_time - 5_000_000
     await query_data(bucket, start_time, end_time)
 
 
 if __name__ == "__main__":
+    """Run the main coroutine."""
     asyncio.run(main())

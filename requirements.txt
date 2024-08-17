@@ -1,4 +1,8 @@
 reduct-py
+influxdb-client[ciso]
+aiohttp
+pandas
 matplotlib
+seaborn
 numpy
 ipykernel
