@@ -76,8 +76,9 @@ async def main():
         signal = generate_sensor_data(frequency=frequency, duration=duration)
 
         await asyncio.sleep(duration)
-        await store_data(client, signal, start_time, frequency=frequency)
+        await store_data(client, signal, start_time, frequency)
 
+        await asyncio.sleep(1)
         end_time = get_current_time(TimeUnits.NANOSECOND)
         result = await query_data(client, start_time, end_time)
 

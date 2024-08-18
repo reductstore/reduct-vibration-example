@@ -7,7 +7,7 @@ import numpy as np
 from influxdb_client.client.influxdb_client_async import InfluxDBClientAsync
 from influxdb_example import store_data as store_influxdb
 from influxdb_example import query_data as query_influxdb
-from scripts.plot import (
+from plot import (
     plot_benchmark_results,
     prepare_csv,
     read_benchmark_results,
@@ -20,7 +20,6 @@ from utils import (
     TimeUnits,
     calculate_metrics,
     generate_sensor_data,
-    get_current_rfc3339_time,
     get_current_time,
     pack_data,
 )
@@ -36,7 +35,7 @@ REDUCTSTORE_URL = "http://localhost:8383"
 REDUCTSTORE_TOKEN = "my-token"
 
 # Constants for benchmarking
-FREQUENCIES = [1000, 2000]  # 5000, 10_000, 20_000, 30_000]
+FREQUENCIES = [1000, 2000, 5000, 10_000, 20_000, 30_000]
 DURATION = 1
 NUMBER_RUNS = 1
 
@@ -47,28 +46,27 @@ CSV_FILE_PATH = "benchmark_results.csv"
 async def benchmark_influxdb(frequency: int):
     """Benchmark write and read performance for InfluxDB."""
     async with InfluxDBClientAsync(url=INFLUXDB_URL, token=TOKEN, org=ORG) as client:
-        start_time = get_current_rfc3339_time()
+        await client.ping()
+        assert await client.ping(), "InfluxDB connection failed"
 
+        start_time = get_current_time(TimeUnits.NANOSECOND)
         signal = generate_sensor_data(frequency=frequency, duration=DURATION)
-        timestamp = get_current_time(TimeUnits.MICROSECOND)
 
         await asyncio.sleep(DURATION)
-
         start_write = time.time()
-        await store_influxdb(client, signal, timestamp, frequency)
+        await store_influxdb(client, signal, start_time, frequency)
         end_write = time.time()
 
-        end_time = get_current_rfc3339_time()
+        # wait to ensure data is available for querying (TODO: improve this).,mn bv≈
 
+        end_time = get_current_time(TimeUnits.NANOSECOND)
         start_read = time.time()
         result = await query_influxdb(client, start_time, end_time)
         end_read = time.time()
 
-    assert len(result) == 1
-    assert all(
-        np.array([record["_value"] for record in result[0].records], dtype=np.float32)
-        == signal.astype(np.float32)
-    )
+    assert np.array_equal(
+        signal, result
+    ), f"Stored and queried data do not match: {len(signal)} vs {len(result)}"
 
     print(f"InfluxDB Frequency: {frequency} Hz")
     print(f"Write Time: {end_write - start_write:.2f} seconds")
@@ -88,28 +86,31 @@ async def benchmark_reductstore(frequency: int):
     """Benchmark write and read performance for ReductStore."""
     async with ReductClient(REDUCTSTORE_URL, api_token=REDUCTSTORE_TOKEN) as client:
         bucket = await client.create_bucket("sensor_data", exist_ok=True)
-        start_time = get_current_time(TimeUnits.MICROSECOND)
+        start_time = get_current_time()
 
         signal = generate_sensor_data(frequency=frequency, duration=DURATION)
-        rms, peak_to_peak, crest_factor = calculate_metrics(signal)
-        packed_data = pack_data(signal)
-        timestamp = get_current_time(TimeUnits.MICROSECOND)
+        signal_chunks = np.array_split(signal, DURATION)
 
         await asyncio.sleep(DURATION)
-
         start_write = time.time()
-        await store_reductstore(
-            bucket, timestamp, packed_data, rms, peak_to_peak, crest_factor
-        )
+        timestamp = start_time
+        for chunk in signal_chunks:
+            rms, peak_to_peak, crest_factor = calculate_metrics(chunk)
+            packed_data = pack_data(chunk)
+            await store_reductstore(
+                bucket, timestamp, packed_data, rms, peak_to_peak, crest_factor
+            )
+            timestamp += len(chunk) * TimeUnits.MICROSECOND // frequency
         end_write = time.time()
 
-        end_time = get_current_time(TimeUnits.MICROSECOND)
+        end_time = get_current_time()
         start_read = time.time()
         result = await query_reductstore(bucket, start_time, end_time)
         end_read = time.time()
 
-    assert isinstance(result, bytes)
-    assert result == packed_data
+    assert np.array_equal(
+        signal, result
+    ), f"Stored and queried data do not match: {len(signal)} vs {len(result)}"
 
     print(f"ReductStore Frequency: {frequency} Hz")
     print(f"Write Time: {end_write - start_write:.2f} seconds")
