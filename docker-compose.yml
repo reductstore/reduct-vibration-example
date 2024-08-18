@@ -2,16 +2,16 @@ services:
   reductstore:
     image: reduct/store:latest
     ports:
-      - "8383:8383"
+      - 8383:8383
     volumes:
       - reductstore_data:/data
     environment:
       - RS_API_TOKEN=my-token
 
   influxdb:
-    image: influxdb:latest
+    image: influxdb:2
     ports:
-      - "8086:8086"
+      - 8086:8086
     volumes:
       - influxdb_data:/var/lib/influxdb2
     environment:

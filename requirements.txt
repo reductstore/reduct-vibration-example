@@ -1,5 +1,5 @@
 reduct-py
-influxdb-client[ciso]
+influxdb-client[async]
 aiohttp
 pandas
 matplotlib
