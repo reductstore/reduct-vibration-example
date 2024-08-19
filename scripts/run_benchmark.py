@@ -29,11 +29,13 @@ from tqdm import tqdm
 INFLUXDB_URL = "http://localhost:8086"
 TOKEN = "my-token"
 ORG = "my-org"
-BUCKET = "sensor_data"
 
 # ReductStore configuration
 REDUCTSTORE_URL = "http://localhost:8383"
 REDUCTSTORE_TOKEN = "my-token"
+
+# Bucket name for storing sensor data
+BUCKET = "sensor_data"
 
 # Constants for benchmarking
 FREQUENCIES = [1000, 2000, 5000, 10_000, 20_000, 30_000]
@@ -56,13 +58,13 @@ async def benchmark_influxdb(frequency: int):
         await asyncio.sleep(DURATION)
 
         start_write = time.time()
-        await store_influxdb(client, signal, start_time, time_step)
+        await store_influxdb(client, BUCKET, signal, start_time, time_step)
         end_write = time.time()
 
         end_time = get_current_time(TimeUnits.NANOSECOND)
 
         start_read = time.time()
-        result = await query_influxdb(client, start_time, end_time, time_step)
+        result = await query_influxdb(client, BUCKET, start_time, end_time, time_step)
         end_read = time.time()
 
     assert np.array_equal(
@@ -82,7 +84,7 @@ async def benchmark_reductstore(frequency: int):
     """Benchmark write and read performance for ReductStore."""
     time_step = TimeUnits.MICROSECOND // frequency
     async with ReductClient(REDUCTSTORE_URL, api_token=REDUCTSTORE_TOKEN) as client:
-        bucket = await client.create_bucket("sensor_data", exist_ok=True)
+        bucket = await client.create_bucket(BUCKET, exist_ok=True)
         start_time = get_current_time()
 
         signal = generate_sensor_data(frequency=frequency, duration=DURATION)

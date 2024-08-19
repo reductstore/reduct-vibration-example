@@ -3,6 +3,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from pathlib import Path
 
 sns.set_theme(style="whitegrid")
 
@@ -40,7 +41,7 @@ def read_benchmark_results(csv_file_path: str) -> pd.DataFrame:
     return pd.read_csv(csv_file_path)
 
 
-def plot_benchmark_results(df: pd.DataFrame):
+def plot_benchmark_results(df: pd.DataFrame, path: Path = Path(".")):
     """Plot benchmark results using Seaborn's catplot with log scale."""
     df_melted = pd.melt(
         df,
@@ -75,7 +76,7 @@ def plot_benchmark_results(df: pd.DataFrame):
     g.despine(left=True)
 
     plt.tight_layout()
-    plt.savefig("benchmark_comparison.png")
+    plt.savefig(path / "benchmark_results.png")
     plt.show()
 
 

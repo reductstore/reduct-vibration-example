@@ -13,14 +13,13 @@ from influxdb_client import Point
 from influxdb_client.client.influxdb_client_async import InfluxDBClientAsync
 from influxdb_client.domain.write_precision import WritePrecision
 
-INFLUXDB_URL = "http://localhost:8086"
-TOKEN = "my-token"
-ORG = "my-org"
-BUCKET = "sensor_data"
-
 
 async def store_data(
-    client: InfluxDBClientAsync, signal: np.ndarray, start_time: int, time_step: int
+    client: InfluxDBClientAsync,
+    bucket: str,
+    signal: np.ndarray,
+    start_time: int,
+    time_step: int,
 ):
     """Store the sensor data in the InfluxDB in a batch."""
     points = []
@@ -32,11 +31,12 @@ async def store_data(
         )
         points.append(point)
 
-    await client.write_api().write(bucket=BUCKET, record=points, org=ORG)
+    await client.write_api().write(bucket=bucket, record=points)
 
 
 async def query_data(
     client: InfluxDBClientAsync,
+    bucket: str,
     start_time: int,
     end_time: int,
     time_step: int,
@@ -46,14 +46,14 @@ async def query_data(
     end_time_rfc3339 = time_to_rfc3339(end_time + time_step, TimeUnits.NANOSECOND)
 
     query = f"""
-    from(bucket: "{BUCKET}")
+    from(bucket: "{bucket}")
       |> range(start: {start_time_rfc3339}, stop: {end_time_rfc3339})
       |> filter(fn: (r) => r._measurement == "sensor_values")
       |> sort(columns: ["_time"])
       |> keep(columns: ["_time", "_value"])
     """
 
-    result = await client.query_api().query(query=query, org=ORG)
+    result = await client.query_api().query(query=query)
 
     if not result:
         print("No data found in query")
@@ -70,7 +70,9 @@ async def main():
     duration = 5
 
     time_step = TimeUnits.NANOSECOND // frequency
-    async with InfluxDBClientAsync(url=INFLUXDB_URL, token=TOKEN, org=ORG) as client:
+    async with InfluxDBClientAsync(
+        url="http://localhost:8086", token="my-token", org="my-org"
+    ) as client:
         await client.ping()
         assert await client.ping(), "InfluxDB connection failed"
 
@@ -78,10 +80,12 @@ async def main():
         signal = generate_sensor_data(frequency=frequency, duration=duration)
 
         await asyncio.sleep(duration)
-        await store_data(client, signal, start_time, time_step)
+        await store_data(client, "sensor_data", signal, start_time, time_step)
 
         end_time = get_current_time(TimeUnits.NANOSECOND)
-        result = await query_data(client, start_time, end_time, time_step)
+        result = await query_data(
+            client, "sensor_data", start_time, end_time, time_step
+        )
 
         assert np.array_equal(
             signal, result
