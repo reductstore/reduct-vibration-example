@@ -3,14 +3,14 @@
 import asyncio
 
 import numpy as np
-from influxdb_client import Point
-from influxdb_client.client.influxdb_client_async import InfluxDBClientAsync
-from scripts.helper_functions import (
+from helper_functions import (
     TimeUnits,
     generate_sensor_data,
     get_current_time,
     time_to_rfc3339,
 )
+from influxdb_client import Point
+from influxdb_client.client.influxdb_client_async import InfluxDBClientAsync
 from influxdb_client.domain.write_precision import WritePrecision
 
 INFLUXDB_URL = "http://localhost:8086"

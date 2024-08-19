@@ -4,25 +4,25 @@ import asyncio
 import time
 
 import numpy as np
-from influxdb_client.client.influxdb_client_async import InfluxDBClientAsync
-from scripts.influxdb_data_processing import store_data as store_influxdb
-from scripts.influxdb_data_processing import query_data as query_influxdb
-from scripts.plot_results import (
-    plot_benchmark_results,
-    prepare_csv,
-    read_benchmark_results,
-    write_to_csv,
-)
-from scripts.reduct_data_processing import store_data as store_reductstore
-from scripts.reduct_data_processing import query_data as query_reductstore
-from reduct import Client as ReductClient
-from scripts.helper_functions import (
+from helper_functions import (
     TimeUnits,
     calculate_metrics,
     generate_sensor_data,
     get_current_time,
     pack_data,
 )
+from influxdb_client.client.influxdb_client_async import InfluxDBClientAsync
+from influxdb_data_processing import query_data as query_influxdb
+from influxdb_data_processing import store_data as store_influxdb
+from plot_results import (
+    plot_benchmark_results,
+    prepare_csv,
+    read_benchmark_results,
+    write_to_csv,
+)
+from reduct import Client as ReductClient
+from reduct_data_processing import query_data as query_reductstore
+from reduct_data_processing import store_data as store_reductstore
 
 # InfluxDB configuration
 INFLUXDB_URL = "http://localhost:8086"
