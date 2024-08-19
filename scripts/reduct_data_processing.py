@@ -56,6 +56,7 @@ async def main():
     frequency = 1000
     duration = 5
 
+    time_step = TimeUnits.MICROSECOND // frequency
     async with Client("http://localhost:8383", api_token="my-token") as client:
         bucket = await client.create_bucket("sensor_data", exist_ok=True)
         start_time = get_current_time()
@@ -63,15 +64,14 @@ async def main():
         signal = generate_sensor_data(frequency=frequency, duration=duration)
         signal_chunks = np.array_split(signal, duration)
 
-        timestamp = get_current_time()
-        for chunk in signal_chunks:
+        for step, chunk in enumerate(signal_chunks):
             rms, peak_to_peak, crest_factor = calculate_metrics(chunk)
             packed_data = pack_data(chunk)
+            timestamp = start_time + step * len(chunk) * time_step
             await store_data(
                 bucket, timestamp, packed_data, rms, peak_to_peak, crest_factor
             )
             await asyncio.sleep(1)
-            timestamp += len(chunk) * TimeUnits.MICROSECOND // frequency
 
         end_time = get_current_time()
         result = await query_data(bucket, start_time, end_time)

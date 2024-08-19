@@ -56,7 +56,6 @@ async def query_data(
     result = await client.query_api().query(query=query)
 
     if not result:
-        print("No data found in query")
         return np.array([], dtype=np.float32)
 
     return np.array(
