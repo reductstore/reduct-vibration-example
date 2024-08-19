@@ -36,8 +36,8 @@ REDUCTSTORE_TOKEN = "my-token"
 
 # Constants for benchmarking
 FREQUENCIES = [1000, 2000, 5000, 10_000, 20_000, 30_000]
-DURATION = 1
-NUMBER_RUNS = 1
+DURATION = 10
+NUMBER_RUNS = 10
 
 # CSV file path
 CSV_FILE_PATH = "benchmark_results.csv"
