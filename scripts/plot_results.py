@@ -51,6 +51,10 @@ def plot_benchmark_results(df: pd.DataFrame, path: Path = Path(".")):
         value_name="Time (s)",
     )
 
+    df_melted["Metric"] = df_melted["Metric"].replace(
+        {"Write Time (s)": "Write", "Read Time (s)": "Read"}
+    )
+
     g = sns.catplot(
         data=df_melted,
         x="Frequency (Hz)",
@@ -62,13 +66,14 @@ def plot_benchmark_results(df: pd.DataFrame, path: Path = Path(".")):
         linestyles=["-", "--"],
         height=5,
         aspect=1.5,
-        capsize=0.2,
         palette="Set2",
         legend_out=False,
+        errorbar=None,
     )
 
     for ax in g.axes.flat:
-        ax.set_yscale("log")
+        for line in ax.lines:
+            line.set_markersize(5)
 
     g.set_axis_labels("Frequency (Hz)", "Time (s)")
     g.set_xticklabels(rotation=45)
@@ -76,7 +81,7 @@ def plot_benchmark_results(df: pd.DataFrame, path: Path = Path(".")):
     g.despine(left=True)
 
     plt.tight_layout()
-    plt.savefig(path / "benchmark_results.png")
+    plt.savefig(path / "benchmark_results.png", dpi=300)
     plt.show()
 
 
