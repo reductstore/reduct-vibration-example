@@ -45,6 +45,7 @@ CSV_FILE_PATH = "benchmark_results.csv"
 
 async def benchmark_influxdb(frequency: int):
     """Benchmark write and read performance for InfluxDB."""
+    time_step = TimeUnits.NANOSECOND // frequency
     async with InfluxDBClientAsync(url=INFLUXDB_URL, token=TOKEN, org=ORG) as client:
         await client.ping()
         assert await client.ping(), "InfluxDB connection failed"
@@ -54,14 +55,12 @@ async def benchmark_influxdb(frequency: int):
 
         await asyncio.sleep(DURATION)
         start_write = time.time()
-        await store_influxdb(client, signal, start_time, frequency)
+        await store_influxdb(client, signal, start_time, time_step)
         end_write = time.time()
-
-        # wait to ensure data is available for querying (TODO: improve this).,mn bv≈
 
         end_time = get_current_time(TimeUnits.NANOSECOND)
         start_read = time.time()
-        result = await query_influxdb(client, start_time, end_time)
+        result = await query_influxdb(client, start_time, end_time, time_step)
         end_read = time.time()
 
     assert np.array_equal(
