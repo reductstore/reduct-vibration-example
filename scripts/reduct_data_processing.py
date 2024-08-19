@@ -77,7 +77,7 @@ async def main():
         result = await query_data(bucket, start_time, end_time)
         assert np.array_equal(
             signal, result
-        ), f"Stored and queried data do not match: {len(signal)} vs {len(result)}"
+        ), f"Data do not match with {len(signal)} signals vs {len(result)} results"
 
 
 if __name__ == "__main__":

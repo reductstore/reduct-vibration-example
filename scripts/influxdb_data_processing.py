@@ -85,7 +85,7 @@ async def main():
 
         assert np.array_equal(
             signal, result
-        ), f"Data do not match: signal {len(signal)} vs result {len(result)}"
+        ), f"Data do not match with {len(signal)} signals vs {len(result)} results"
 
 
 if __name__ == "__main__":
