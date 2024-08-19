@@ -5,18 +5,18 @@ import time
 
 import numpy as np
 from influxdb_client.client.influxdb_client_async import InfluxDBClientAsync
-from influxdb_example import store_data as store_influxdb
-from influxdb_example import query_data as query_influxdb
-from plot import (
+from scripts.influxdb_data_processing import store_data as store_influxdb
+from scripts.influxdb_data_processing import query_data as query_influxdb
+from scripts.plot_results import (
     plot_benchmark_results,
     prepare_csv,
     read_benchmark_results,
     write_to_csv,
 )
-from reduct_example import store_data as store_reductstore
-from reduct_example import query_data as query_reductstore
+from scripts.reduct_data_processing import store_data as store_reductstore
+from scripts.reduct_data_processing import query_data as query_reductstore
 from reduct import Client as ReductClient
-from utils import (
+from scripts.helper_functions import (
     TimeUnits,
     calculate_metrics,
     generate_sensor_data,

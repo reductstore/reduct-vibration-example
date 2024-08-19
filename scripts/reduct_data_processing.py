@@ -5,7 +5,7 @@ import struct
 
 import numpy as np
 from reduct import Bucket, Client
-from utils import (
+from scripts.helper_functions import (
     calculate_metrics,
     generate_sensor_data,
     pack_data,

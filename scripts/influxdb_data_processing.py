@@ -5,7 +5,7 @@ import asyncio
 import numpy as np
 from influxdb_client import Point
 from influxdb_client.client.influxdb_client_async import InfluxDBClientAsync
-from utils import (
+from scripts.helper_functions import (
     TimeUnits,
     generate_sensor_data,
     get_current_time,
