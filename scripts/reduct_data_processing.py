@@ -28,9 +28,9 @@ async def store_data(
 ):
     """Store the sensor data in the ReductStore."""
     labels = {
-        "rms": "high" if rms > HIGH_RMS else "low",
-        "peak_to_peak": "high" if peak_to_peak > HIGH_PEAK_TO_PEAK else "low",
-        "crest_factor": "high" if crest_factor > HIGH_CREST_FACTOR else "low",
+        "rms": rms,
+        "peak_to_peak": peak_to_peak,
+        "crest_factor": crest_factor,
     }
     await bucket.write("sensor_readings", packed_data, timestamp, labels=labels)
 
