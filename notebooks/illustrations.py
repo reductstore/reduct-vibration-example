@@ -75,4 +75,60 @@ plt.title("Typical Weekend Problem")
 plt.savefig(os.path.join(directory, "weekend_problem.png"), dpi=300)
 plt.show()
 
+# %% Show the aliasing effect
+
+# Generate the base signal
+f0 = 5  # Frequency of the base signal in Hz
+t_continuous = np.linspace(0, 1, 1000)
+signal_continuous = np.sin(2 * np.pi * f0 * t_continuous)
+
+# Low sampling frequency (causes aliasing)
+fs_low = 6  # Sampling frequency in Hz (less than 2 * f0)
+t_low = np.arange(0, 1, 1 / fs_low)
+signal_low = np.sin(2 * np.pi * f0 * t_low)
+
+# High sampling frequency (samples correctly)
+fs_high = 50  # Sampling frequency in Hz (greater than 2 * f0)
+t_high = np.arange(0, 1, 1 / fs_high)
+signal_high = np.sin(2 * np.pi * f0 * t_high)
+
+# Create subplots
+plt.figure(figsize=(12, 8))
+
+# Plot with low sampling frequency
+plt.subplot(2, 1, 1)
+plt.plot(t_continuous, signal_continuous, label="Original Signal", color="#2c0549")
+plt.stem(
+    t_low,
+    signal_low,
+    linefmt="r-",
+    markerfmt="ro",
+    basefmt=" ",
+    label=f"Sampled Signal (fs = {fs_low} Hz)",
+)
+plt.title("Aliasing Effect with Low Sampling Frequency")
+plt.xlabel("Time (s)")
+plt.ylabel("Amplitude")
+plt.legend()
+
+# Plot with high sampling frequency
+plt.subplot(2, 1, 2)
+plt.plot(t_continuous, signal_continuous, label="Original Signal", color="#2c0549")
+plt.stem(
+    t_high,
+    signal_high,
+    linefmt="g-",
+    markerfmt="go",
+    basefmt=" ",
+    label=f"Sampled Signal (fs = {fs_high} Hz)",
+)
+plt.title("Proper Sampling with High Sampling Frequency")
+plt.xlabel("Time (s)")
+plt.ylabel("Amplitude")
+plt.legend()
+
+plt.tight_layout()
+plt.savefig(os.path.join(directory, "aliasing_effect.png"), dpi=300)
+plt.show()
+
 # %%
